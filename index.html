@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hviezdičky</title>
-<meta name="theme-color" content="#2E7D6B">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
@@ -12,20 +12,13 @@
 <style>
 /* Layout: one calm column, big tap targets. Profile picker -> level path -> 5-question round -> sticker reward. */
 :root{
-  --bg:#EEF3F0; --surface:#FFFFFF; --fg:#1E2B27; --muted:#5C6E68; --line:#D3DFDA;
+  --bg:#FFFFFF; --surface:#FFFFFF; --fg:#1E2B27; --muted:#5C6E68; --line:#D3DFDA;
   --accent:#2E7D6B; --accent-fg:#FFFFFF; --good:#2F9E5B; --bad:#C9573F; --star:#E9A91C;
   --hugo:#D98A1F; --oliver:#3566B8; --kid:#2E7D6B;
+  color-scheme:light;
   --f-display:'Fredoka','Trebuchet MS',system-ui,sans-serif;
   --f-body:'Nunito','Segoe UI',system-ui,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#14201C; --surface:#1E2D28; --fg:#E8F1ED; --muted:#9DB2AB; --line:#2E423B;
-  --accent:#5CBFA6; --accent-fg:#0E1B17; --good:#5CD08A; --bad:#EE8B72; --star:#F2BC45;
-  --hugo:#F0A740; --oliver:#7BA3EA; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#14201C; --surface:#1E2D28; --fg:#E8F1ED; --muted:#9DB2AB; --line:#2E423B;
-  --accent:#5CBFA6; --accent-fg:#0E1B17; --good:#5CD08A; --bad:#EE8B72; --star:#F2BC45;
-  --hugo:#F0A740; --oliver:#7BA3EA; color-scheme:dark}
 body[data-kid="hugo"]{--kid:var(--hugo)}
 body[data-kid="oliver"]{--kid:var(--oliver)}
 *{box-sizing:border-box}
