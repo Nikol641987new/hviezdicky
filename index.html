@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hviezdičky</title>
+<meta name="theme-color" content="#2E7D6B">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap">
+<style>
+/* Layout: one calm column, big tap targets. Profile picker -> level path -> 5-question round -> sticker reward. */
+:root{
+  --bg:#EEF3F0; --surface:#FFFFFF; --fg:#1E2B27; --muted:#5C6E68; --line:#D3DFDA;
+  --accent:#2E7D6B; --accent-fg:#FFFFFF; --good:#2F9E5B; --bad:#C9573F; --star:#E9A91C;
+  --hugo:#D98A1F; --oliver:#3566B8; --kid:#2E7D6B;
+  --f-display:'Fredoka','Trebuchet MS',system-ui,sans-serif;
+  --f-body:'Nunito','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14201C; --surface:#1E2D28; --fg:#E8F1ED; --muted:#9DB2AB; --line:#2E423B;
+  --accent:#5CBFA6; --accent-fg:#0E1B17; --good:#5CD08A; --bad:#EE8B72; --star:#F2BC45;
+  --hugo:#F0A740; --oliver:#7BA3EA; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14201C; --surface:#1E2D28; --fg:#E8F1ED; --muted:#9DB2AB; --line:#2E423B;
+  --accent:#5CBFA6; --accent-fg:#0E1B17; --good:#5CD08A; --bad:#EE8B72; --star:#F2BC45;
+  --hugo:#F0A740; --oliver:#7BA3EA; color-scheme:dark}
+body[data-kid="hugo"]{--kid:var(--hugo)}
+body[data-kid="oliver"]{--kid:var(--oliver)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-weight:700;font-size:18px;line-height:1.35;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;min-height:100vh}
+#app{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance;line-height:1.1}
+h1{font-size:2.3rem} h2{font-size:1.6rem} h3{font-size:1.2rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+.muted{color:var(--muted);font-weight:600}
+.btn{background:var(--accent);color:var(--accent-fg);font-family:var(--f-display);font-weight:600;font-size:1.25rem;padding:14px 26px;border-radius:999px;min-height:56px}
+.btn.ghost{background:transparent;color:var(--fg);border:2px solid var(--line)}
+.btn:active{transform:scale(.97)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-family:var(--f-display);font-weight:600}
+.pill .s{color:var(--star)}
+/* profiles */
+.kids{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.kid{background:var(--surface);border:3px solid var(--line);border-radius:28px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.kid .face{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-size:3.2rem;background:var(--c)}
+.kid[data-k="hugo"]{--c:color-mix(in srgb,var(--hugo) 30%,var(--surface))}
+.kid[data-k="oliver"]{--c:color-mix(in srgb,var(--oliver) 30%,var(--surface))}
+.kid:hover{border-color:var(--kid)}
+.kid[data-k="hugo"]:hover{border-color:var(--hugo)} .kid[data-k="oliver"]:hover{border-color:var(--oliver)}
+/* level path */
+.path{display:flex;flex-direction:column;gap:12px;list-style:none;margin:0;padding:0}
+.lvl{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:3px solid var(--line);border-radius:22px;padding:14px 16px;min-height:84px}
+.lvl .n{flex:none;width:52px;height:52px;border-radius:50%;background:var(--kid);color:#fff;display:grid;place-items:center;font-family:var(--f-display);font-size:1.5rem;font-weight:700}
+body[data-kid="hugo"] .lvl .n{color:#241600}
+.lvl .t{flex:1;min-width:0}
+.lvl .r{flex:none;font-size:2rem}
+.lvl[disabled]{opacity:.5;cursor:not-allowed}
+.lvl[disabled] .n{background:var(--line);color:var(--muted)}
+.lvl.next{border-color:var(--kid)}
+/* quiz */
+.dots{display:flex;gap:8px;justify-content:center}
+.dots i{width:16px;height:16px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--kid)} .dots i.ok{background:var(--good)}
+.q{background:var(--surface);border-radius:28px;border:3px solid var(--line);padding:22px 18px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.q .say{font-family:var(--f-display);font-size:1.7rem;font-weight:600;line-height:1.15;text-wrap:balance}
+.speak{width:52px;height:52px;border-radius:50%;background:var(--bg);border:2px solid var(--line);font-size:1.5rem}
+.pic{display:flex;flex-wrap:wrap;gap:6px 10px;justify-content:center;align-items:center;min-height:30px;font-size:2.6rem;line-height:1.1}
+.pic.big{font-size:3.6rem}
+.pic .gone{opacity:.22;filter:grayscale(1)}
+.eq{font-family:var(--f-display);font-size:2.4rem;font-weight:700}
+.seq{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.seq b{min-width:56px;padding:10px 6px;border-radius:14px;background:var(--bg);font-family:var(--f-display);font-size:2rem}
+.seq b.hole{background:transparent;border:3px dashed var(--kid);color:var(--kid)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;width:100%}
+.opt{min-height:112px;border-radius:22px;background:var(--bg);border:3px solid var(--line);display:grid;place-items:center;padding:8px;font-size:3rem}
+.opt .num,.opt .let{font-family:var(--f-display);font-weight:700;font-size:3rem}
+.opt:active{transform:scale(.96)}
+.opt.ok{background:color-mix(in srgb,var(--good) 25%,var(--surface));border-color:var(--good);animation:pop .4s}
+.opt.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--surface));animation:shake .35s}
+.opt[disabled]{pointer-events:none}
+.sw{display:block;width:68px;height:68px;border-radius:50%;border:3px solid rgba(0,0,0,.15)}
+.shape{width:78px;height:78px;display:block}
+.shape.lg{width:120px;height:120px}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@keyframes pop{50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+.brand{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.logo{width:min(230px,70%);height:auto;display:block}
+/* find & tap */
+.board{display:grid;gap:8px;width:100%}
+.cell{aspect-ratio:1;min-height:56px;padding:0;border-radius:18px;background:var(--bg);border:3px solid var(--line);font-size:clamp(1.5rem,7vw,2.6rem);display:grid;place-items:center}
+.cell:active{transform:scale(.95)}
+.cell.ok{background:color-mix(in srgb,var(--good) 25%,var(--surface));border-color:var(--good);animation:pop .4s}
+.cell.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--surface));animation:shake .35s}
+.cell[disabled]{pointer-events:none}
+.vbox{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.vbox select{font:inherit;font-size:.95rem;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--fg);max-width:100%}
+/* done */
+.done{align-items:center;text-align:center;display:flex;flex-direction:column;gap:16px}
+.stars{display:flex;gap:6px;font-size:2.6rem;justify-content:center}
+.stars .off{filter:grayscale(1);opacity:.25}
+.sticker{width:150px;height:150px;border-radius:50%;background:var(--surface);border:6px solid var(--kid);display:grid;place-items:center;font-size:5rem;animation:pop .6s}
+.shelf{display:flex;flex-wrap:wrap;gap:10px}
+.shelf span{width:56px;height:56px;border-radius:50%;background:var(--surface);border:3px solid var(--line);display:grid;place-items:center;font-size:1.8rem}
+.shelf span.empty{filter:grayscale(1);opacity:.25}
+.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.foot{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.link{font-size:.9rem;color:var(--muted);text-decoration:underline;padding:8px}
+</style>
+
+</head>
+<body>
+<main id="app"></main>
+
+<script>
+(function(){
+var KEY='hugo-oliverko-v2';
+var state={hugo:{stars:0,done:{}},oliver:{stars:0,done:{}}};
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.hugo&&p.oliver)state=p}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function shuffle(a){return a.map(function(x){return[Math.random(),x]}).sort(function(p,q){return p[0]-q[0]}).map(function(p){return p[1]})}
+function pick(a){return a[rnd(0,a.length-1)]}
+function numOpts(c,min,max){var s=[c];var guard=0;while(s.length<4&&s.length<(max-min+1)&&guard++<60){var n=rnd(Math.max(min,c-3),Math.min(max,c+3));if(s.indexOf(n)<0)s.push(n)}
+  return shuffle(s).map(function(n){return{h:'<span class="num">'+n+'</span>',v:n}})}
+function rep(e,n,cls){var o='';for(var i=0;i<n;i++)o+='<span class="'+(cls&&cls(i)||'')+'">'+e+'</span>';return o}
+var VKEY='hugo-oliverko-voice';
+function voices(){try{return speechSynthesis.getVoices()||[]}catch(e){return[]}}
+function bestVoice(){var b=null,bs=-1;voices().forEach(function(v){var l=v.lang.toLowerCase().replace('_','-'),sc=-1;if(l.indexOf('sk')===0)sc=100;else if(l.indexOf('cs')===0)sc=40;if(sc<0)return;
+  var n=v.name.toLowerCase();if(/natural|neural|online/.test(n))sc+=30;if(/premium|enhanced|siri/.test(n))sc+=25;if(/google/.test(n))sc+=15;if(sc>bs){bs=sc;b=v}});return b}
+function currentVoice(){var name=null;try{name=localStorage.getItem(VKEY)}catch(e){}
+  if(name){var f=voices().filter(function(v){return v.name===name})[0];if(f)return f}return bestVoice()}
+var NUMW=['nula','jeden','dva','tri','štyri','päť','šesť','sedem','osem','deväť','desať','jedenásť','dvanásť','trinásť','štrnásť','pätnásť','šestnásť','sedemnásť','osemnásť','devätnásť','dvadsať'];
+function say(t){try{speechSynthesis.cancel();t=t.replace(/\d+/g,function(m){return NUMW[+m]||m});t=t.replace(/Oliver(ko)?/g,'Olivér$1').replace(/je to spolu/g,'je tó spolu');var u=new SpeechSynthesisUtterance(t),v=currentVoice();if(v){u.voice=v;u.lang=v.lang}else u.lang='sk-SK';u.rate=1;u.pitch=1;speechSynthesis.speak(u)}catch(e){}}
+function voiceUI(){var all=voices();if(!all.length)return '';
+  var vs=all.filter(function(v){var l=v.lang.toLowerCase();return l.indexOf('sk')===0||l.indexOf('cs')===0});var note='';
+  if(!vs.length){vs=all;note='<p class="muted" style="text-align:center;font-size:.9rem">Na tomto zariadení nie je slovenský hlas. Vyber si ten, ktorý znie najlepšie.</p>'}
+  var cv=currentVoice();
+  return '<div class="vbox"><label class="muted" for="voice">Hlas:</label><select id="voice">'+vs.map(function(v){return '<option value="'+v.name.replace(/"/g,'&quot;')+'"'+(cv&&cv.name===v.name?' selected':'')+'>'+v.name+' ('+v.lang+')</option>'}).join('')+'</select><button class="link" id="vtest">Vyskúšať</button></div>'+note}
+try{speechSynthesis.onvoiceschanged=function(){var b=document.getElementById('vbox');if(b)b.innerHTML=voiceUI()}}catch(e){}
+document.addEventListener('change',function(e){if(e.target&&e.target.id==='voice'){try{localStorage.setItem(VKEY,e.target.value)}catch(x){}say('Ahoj! Poďme sa učiť.')}});
+document.addEventListener('click',function(e){if(e.target&&e.target.id==='vtest')say('Ahoj! Poďme sa učiť.')});
+var ctx;function ding(ok){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+  o.frequency.value=ok?660:220;o.type='sine';g.gain.setValueAtTime(.12,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);o.start();o.stop(ctx.currentTime+.36);
+  if(ok){var o2=ctx.createOscillator();o2.connect(g);o2.frequency.value=880;o2.start(ctx.currentTime+.12);o2.stop(ctx.currentTime+.4)}}catch(e){}}
+
+var COLORS=[['červenú','#D64545'],['modrú','#2F6FD0'],['žltú','#F2C230'],['zelenú','#3FA66B'],['oranžovú','#EE8A2B'],['fialovú','#8A55C8'],['ružovú','#E86FA6'],['hnedú','#8B5A2B'],['čiernu','#222222'],['sivú','#8C9496']];
+var COUNTABLE=[['🍎','jabĺčok'],['⭐','hviezdičiek'],['🐟','rybiek'],['🎈','balónov'],['🚗','áut'],['🍪','keksíkov'],['🦋','motýľov'],['🌸','kvetov'],['🍓','jahôd'],['🍌','banánov'],['🐢','korytnačiek'],['🚌','autobusov'],['🐥','kuriatok']];
+var SOUNDS=[['🐶','haf'],['🐱','mňau'],['🐄','mú'],['🐑','bé'],['🐷','kroch'],['🐸','kvak'],['🐴','íha'],['🦆','kač kač'],['🐔','kikiriki'],['🐦','čvirik']];
+var WORDS=[['🍎','jablko','J'],['🐱','mačka','M'],['🏠','dom','D'],['☀️','slnko','S'],['🐟','ryba','R'],['🚗','auto','A'],['⚽','lopta','L'],['🐸','žaba','Ž'],['🍌','banán','B'],['🐰','zajac','Z'],['🦆','kačka','K'],['🐦','vták','V'],['🥕','mrkva','M'],['🐘','slon','S'],['🍓','jahoda','J'],['🐻','medveď','M']];
+var ABC='ABCDEFGHIJKLMNOPRSTUVZ'.split('');
+var SHAPES={
+  kruh:'<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="var(--kid)"/></svg>',
+  'štvorec':'<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><rect x="10" y="10" width="80" height="80" rx="6" fill="var(--kid)"/></svg>',
+  'trojuholník':'<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,8 94,90 6,90" fill="var(--kid)"/></svg>',
+  'obdĺžnik':'<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><rect x="4" y="26" width="92" height="48" rx="5" fill="var(--kid)"/></svg>',
+  'ovál':'<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="50" rx="44" ry="28" fill="var(--kid)"/></svg>',
+  'srdce':'<svg class="shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 88 C10 58 4 32 24 20 C38 12 48 22 50 30 C52 22 62 12 76 20 C96 32 90 58 50 88Z" fill="var(--kid)"/></svg>'
+};
+var NAMES={'🐶':'psa','🐱':'mačku','🍎':'jablko','🚗':'auto','⭐':'hviezdu','🐟':'rybu','🎈':'balón','🦋':'motýľa','🐘':'slona','🦁':'leva','🐰':'zajaca','🐴':'koňa','🐄':'kravu','🐸':'žabu','🦆':'kačku','🐦':'vtáka','🍌':'banán','🍓':'jahodu','🥕':'mrkvu','🏠':'dom','☀️':'slnko','⚽':'loptu','🌳':'strom','🌸':'kvet','🚌':'autobus','✈️':'lietadlo','🚲':'bicykel','🐻':'medveďa','🐢':'korytnačku','🐝':'včelu','🍐':'hrušku','🍇':'hrozno'};
+
+var FIND=[['🍎','jabĺčka'],['⭐','hviezdičky'],['🐟','rybky'],['🎈','balóny'],['🚗','autá'],['🦋','motýle'],['🐱','mačičky'],['🌳','stromy'],['🍌','banány'],['🐸','žabky'],['🍓','jahody'],['🌸','kvety'],['🐝','včely'],['🍐','hrušky'],['🐥','kuriatka'],['🐢','korytnačky']];
+function findQ(cells,cols,kmin,kmax){var t=pick(FIND),k=rnd(kmin,kmax),others=shuffle(FIND.filter(function(x){return x!==t})).slice(0,3),b=[];
+  for(var i=0;i<k;i++)b.push({h:t[0],t:1});for(var j=0;j<cells-k;j++)b.push({h:pick(others)[0],t:0});
+  return{text:'Vyber všetky '+t[1]+'.',board:shuffle(b),cols:cols,need:k}}
+function tapnQ(maxN){var n=rnd(2,maxN),e=pick(['🍎','⭐','🐟','🎈','🍪','🦋']),b=[];for(var i=0;i<10;i++)b.push({h:e,t:1});
+  return{text:'Ťukni na '+n+(n<5?' obrázky.':' obrázkov.'),pic:'<span class="eq" style="font-size:3.4rem">'+n+'</span>',board:b,cols:5,need:n}}
+var COLOR_DOTS=['🔴','🔵','🟡','🟢'];
+function groupOpt(n,e,size){return '<span style="font-size:'+size+';line-height:1.15;display:block;max-width:100%">'+rep(e,n)+'</span>'}
+function countQ(min,max){var n=rnd(min,max),o=pick(COUNTABLE);return{text:'Koľko je tu '+o[1]+'?',pic:rep(o[0],n),big:max<=5,opts:numOpts(n,1,Math.max(max,3)),ans:n}}
+function compareQ(max,size){var a=rnd(1,max),b=rnd(1,max);while(b===a)b=rnd(1,max);var e=pick(['🍎','⭐','🐟','🎈','🍪','🦋']),more=Math.random()<.7;
+  return{text:more?'Ťukni na obrázok, kde je viac.':'Ťukni na obrázok, kde je menej.',opts:shuffle([{h:groupOpt(a,e,size),v:'a'},{h:groupOpt(b,e,size),v:'b'}]),ans:more?(a>b?'a':'b'):(a<b?'a':'b')}}
+function sumQ(maxSum){var a=rnd(1,maxSum-1),b=rnd(1,maxSum-a),o=pick(['🍎','⭐','🐟','🎈','🍪']);
+  return{text:'Koľko je to spolu?',pic:rep(o,a)+' <span class="eq">+</span> '+rep(o,b),eq:a+' + '+b+' = ?',opts:numOpts(a+b,2,maxSum),ans:a+b}}
+var GONE={'🎈':['Jeden balón praskol.','balóny praskli.','balónov prasklo.'],'⭐':['Jedna hviezdička zmizla.','hviezdičky zmizli.','hviezdičiek zmizlo.'],'🍎':['Jedno jabĺčko spadlo.','jabĺčka spadli.','jabĺčok spadlo.'],'🍪':['Jeden keksík sme zjedli.','keksíky sme zjedli.','keksíkov sme zjedli.'],'🐟':['Jedna rybka odplávala.','rybky odplávali.','rybiek odplávalo.']};
+function subQ(maxA){var a=rnd(2,maxA),b=rnd(1,a-1),o=pick(Object.keys(GONE)),g=GONE[o];
+  var what=b===1?g[0]:(b<5?((b===2&&o!=='🎈'&&o!=='🍪'?'Dve':b)+' '+g[1]):b+' '+g[2]);
+  return{text:what+' Koľko ostalo?',pic:rep(o,a,function(i){return i>=a-b?'gone':''}),eq:a+' − '+b+' = ?',opts:numOpts(a-b,0,maxA),ans:a-b}}
+
+var KIDS={
+ hugo:{name:'Hugo',ageText:'3 roky',face:'🧸',stickers:['🦁','🐘','🐯','🦒','🐼','🐨','🦊','🐸','🐙','🦄','🐝'],levels:[
+  {t:'Farby',h:'Vyber správnu farbu',icon:'🎨',speak:true,make:function(){var c=pick(COLORS);var o=shuffle(COLORS.filter(function(x){return x!==c})).slice(0,2).concat([c]);
+    return{text:'Vyber '+c[0]+' farbu.',opts:shuffle(o).map(function(x){return{h:'<span class="sw" style="background:'+x[1]+'"></span>',v:x[0]}}),ans:c[0]}}},
+  {t:'Tvary',h:'Kruh, štvorec, srdce…',icon:'🔺',speak:true,make:function(){var k=Object.keys(SHAPES);var c=pick(k);var sh=shuffle(k.filter(function(x){return x!==c})).slice(0,2).concat([c]);
+    return{text:'Ťukni na '+c+'.',opts:shuffle(sh).map(function(x){return{h:SHAPES[x],v:x}}),ans:c}}},
+  {t:'Vyber obrázok',h:'Vyber motýľa, auto, psa…',icon:'🦋',speak:true,make:function(){var N=NAMES,E=Object.keys(N);var c=pick(E);var o=shuffle(E.filter(function(x){return x!==c})).slice(0,2).concat([c]);
+    return{text:'Vyber '+N[c]+'.',opts:shuffle(o).map(function(x){return{h:x,v:x}}),ans:c}}},
+  {t:'Koľko je to?',h:'Počítame 1, 2, 3',icon:'🔢',speak:true,make:function(){return countQ(1,3)}},
+  {t:'Veľké a malé',h:'Ktoré je väčšie alebo menšie?',icon:'🐘',speak:true,make:function(){var e=pick(['🐘','🍎','🐶','⭐','🚗','🐱']),big=Math.random()<.5;var a=rnd(0,1);
+    var sz=[['5.6rem','big'],['2.6rem','small']];if(a)sz.reverse();
+    return{text:big?'Ťukni na obrázok, ktorý je väčší.':'Ťukni na obrázok, ktorý je menší.',opts:sz.map(function(s){return{h:'<span style="font-size:'+s[0]+'">'+e+'</span>',v:s[1]}}),ans:big?'big':'small'}}},
+  {t:'Zvieratká',h:'Aké zvieratko robí haf, mňau, mú?',icon:'🐶',speak:true,make:function(){var c=pick(SOUNDS);var o=shuffle(SOUNDS.filter(function(x){return x[1]!==c[1]&&!((x[0]==='🐸'&&c[0]==='🦆')||(x[0]==='🦆'&&c[0]==='🐸'))})).slice(0,2).concat([c]);
+    return{text:'Aké zvieratko robí '+c[1]+'?',opts:shuffle(o).map(function(x){return{h:x[0],v:x[0]}}),ans:c[0]}}},
+  {t:'Ktoré je iné?',h:'Tri sú rovnaké, jedno nie',icon:'🔍',speak:true,make:function(){var E=Object.keys(NAMES);var s=pick(E);var d=pick(E.filter(function(x){return x!==s}));
+    var items=[{h:d,v:'odd'},{h:s,v:'s1'},{h:s,v:'s2'},{h:s,v:'s3'}];return{text:'Ťukni na obrázok, ktorý je iný.',opts:shuffle(items),ans:'odd'}}},
+  {t:'Počítame do 5',h:'Koľko vidíš, 1 až 5?',icon:'🖐️',speak:true,make:function(){return countQ(1,5)}},
+  {t:'Kde je viac?',h:'Porovnáme dve skupiny',icon:'⚖️',speak:true,make:function(){return compareQ(5,'2rem')}},
+  {t:'Čo bude ďalej?',h:'Červená, modrá, červená…',icon:'🧵',speak:true,make:function(){var d=shuffle(COLOR_DOTS);var a=d[0],b=d[1],c=d[2];
+    return{text:'Vyber farbu, ktorá nasleduje.',pic:a+b+a+b+a+' <span class="eq">?</span>',big:true,opts:shuffle([a,b,c]).map(function(x){return{h:x,v:x}}),ans:b}}},
+  {t:'Nájdi a označ',h:'Ťukni na všetky rovnaké',icon:'👆',speak:true,make:function(){return findQ(9,3,2,3)}}
+ ]},
+ oliver:{name:'Oliverko',ageText:'6 rokov',face:'🚀',stickers:['🚀','🪐','🤖','🏆','👑','🛸','🦖','🌈','🚒','🏅','🌟','🧩','🎁'],levels:[
+  {t:'Počítame do 5',h:'Koľko vidíš?',icon:'🖐️',speak:true,make:function(){return countQ(1,5)}},
+  {t:'Ktoré číslo nasleduje',h:'Čo príde po čísle',icon:'➡️',speak:true,make:function(){var n=rnd(1,9);return{text:'Vyber číslo, ktoré nasleduje po '+n+'.',eq:n+' → ?',opts:numOpts(n+1,1,10),ans:n+1}}},
+  {t:'Viac alebo menej',h:'Ktorá skupina je väčšia?',icon:'⚖️',speak:true,make:function(){return compareQ(10,'1.5rem')}},
+  {t:'Ktoré číslo?',h:'Vyber číslo, ktoré počuješ',icon:'👂',speak:true,make:function(){var n=rnd(1,10);
+    return{text:'Vyber číslo '+n+'.',opts:numOpts(n,1,10),ans:n}}},
+  {t:'Sčítame do 5',h:'Koľko je to spolu?',icon:'➕',speak:true,make:function(){return sumQ(5)}},
+  {t:'Odčítame do 5',h:'Koľko ostalo?',icon:'➖',speak:true,make:function(){return subQ(5)}},
+  {t:'Čo chýba v rade?',h:'Doplň číslo od 1 do 10',icon:'🧩',speak:true,make:function(){var s=rnd(1,6),h=rnd(1,3),m=s+h,items='';
+    for(var i=0;i<5;i++){items+=i===h?'<b class="hole">?</b>':'<b>'+(s+i)+'</b>'}
+    return{text:'Ťukni na číslo, ktoré chýba.',seq:items,opts:numOpts(m,1,10),ans:m}}},
+  {t:'Doplň do 10',h:'Koľko ešte treba do desiatich?',icon:'🎯',speak:true,make:function(){var a=rnd(1,9),b=10-a,o=pick(['🍎','⭐','🐟','🎈']);
+    return{text:'Koľko ešte treba do desiatich?',pic:rep(o,a)+rep('⚪',b),eq:a+' + ? = 10',opts:numOpts(b,1,9),ans:b}}},
+  {t:'Nájdi a označ',h:'Ťukni na všetky rovnaké',icon:'👆',speak:true,make:function(){return findQ(12,4,3,5)}},
+  {t:'Označ toľko',h:'Ťukni presne toľkokrát',icon:'☝️',speak:true,make:function(){return tapnQ(10)}},
+  {t:'Počítame do 10',h:'Koľko vidíš, 1 až 10?',icon:'🔟',speak:true,make:function(){return countQ(4,10)}},
+  {t:'Sčítame do 10',h:'Koľko je to spolu?',icon:'➕',speak:true,make:function(){return sumQ(10)}},
+  {t:'Odčítame do 10',h:'Koľko ostalo?',icon:'➖',speak:true,make:function(){return subQ(10)}}
+ ]}
+};
+
+var app=document.getElementById('app');
+var cur=null,L=null,run=null;
+
+function setKid(k){cur=k;document.body.setAttribute('data-kid',k||'')}
+function starsPill(){return '<span class="pill"><span class="s">★</span>'+state[cur].stars+'</span>'}
+
+function profiles(){
+  setKid(null);
+  app.innerHTML='<header class="brand"><svg class="logo" viewBox="0 0 230 140" role="img" aria-label="Dve hviezdičky, veľká a malá"><polygon points="80.0,24.0 94.7,55.8 129.5,59.9 103.8,83.7 110.6,118.1 80.0,101.0 49.4,118.1 56.2,83.7 30.5,59.9 65.3,55.8" fill="var(--oliver)" stroke="var(--oliver)" stroke-width="10" stroke-linejoin="round"/><polygon points="168.0,70.0 176.8,87.9 196.5,90.7 182.3,104.6 185.6,124.3 168.0,115.0 150.4,124.3 153.7,104.6 139.5,90.7 159.2,87.9" fill="var(--hugo)" stroke="var(--hugo)" stroke-width="10" stroke-linejoin="round"/><g fill="#1E2B27"><circle cx="68" cy="72" r="4.5"/><circle cx="92" cy="72" r="4.5"/><circle cx="160" cy="97" r="3.5"/><circle cx="176" cy="97" r="3.5"/></g><g fill="none" stroke="#1E2B27" stroke-width="3.5" stroke-linecap="round"><path d="M67 85 Q80 97 93 85"/><path d="M161 107 Q168 114 175 107"/></g><g fill="var(--star)"><circle cx="146" cy="34" r="6"/><circle cx="204" cy="52" r="4"/><circle cx="20" cy="28" r="4"/></g></svg><h1>Hviezdičky</h1><p class="muted">Kto sa chce učiť?</p></header>'+
+   '<div class="kids">'+['hugo','oliver'].map(function(k){var K=KIDS[k];
+     return '<button class="kid" data-k="'+k+'"><span class="face">'+K.face+'</span><h2>'+K.name+'</h2><span class="muted">'+K.ageText+' · ★ '+state[k].stars+'</span></button>'}).join('')+'</div>'+
+   '<p class="muted" style="text-align:center">Pre rodiča: každé dieťa má vlastný postup a hviezdičky, ukladajú sa v tomto prehliadači.</p><div id="vbox">'+voiceUI()+'</div>';
+  app.querySelectorAll('.kid').forEach(function(b){b.onclick=function(){setKid(b.dataset.k);home()}});
+}
+
+function home(){
+  var K=KIDS[cur],S=state[cur],lv=K.levels;
+  var nextIdx=-1;for(var i=0;i<lv.length;i++){if(!S.done[i]){nextIdx=i;break}}
+  app.innerHTML='<div class="top"><button class="btn ghost" id="back" style="min-height:44px;padding:8px 18px;font-size:1rem">← Späť</button>'+starsPill()+'</div>'+
+   '<header><h1>Ahoj, '+K.name+'!</h1><p class="muted">Vyber si level. Každý má 5 otázok.</p></header>'+
+   '<ol class="path">'+lv.map(function(l,i){var done=!!S.done[i],locked=i>0&&!S.done[i-1];
+     return '<li><button class="lvl'+(i===nextIdx?' next':'')+'" data-i="'+i+'"'+(locked?' disabled':'')+'><span class="n">'+(i+1)+'</span><span class="t"><h3>'+l.t+'</h3><span class="muted">'+l.h+'</span></span><span class="r">'+(done?K.stickers[i]:(locked?'🔒':l.icon))+'</span></button></li>'}).join('')+'</ol>'+
+   '<section><h3 style="margin-bottom:10px">Moje nálepky</h3><div class="shelf">'+K.stickers.map(function(s,i){return '<span class="'+(S.done[i]?'':'empty')+'">'+s+'</span>'}).join('')+'</div></section>'+
+   '<div id="vbox">'+voiceUI()+'</div><div class="foot"><button class="link" id="reset">Vynulovať postup</button></div>';
+  document.getElementById('back').onclick=profiles;
+  app.querySelectorAll('.lvl').forEach(function(b){b.onclick=function(){start(+b.dataset.i)}});
+  var r=document.getElementById('reset');
+  r.onclick=function(){if(r.dataset.sure){state[cur]={stars:0,done:{}};save();home()}else{r.dataset.sure=1;r.textContent='Naozaj vynulovať? Ťukni ešte raz.'}};
+}
+
+function start(i){
+  L=KIDS[cur].levels[i];
+  var qs=[],keys=[];function qkey(q){return q.text+'|'+(q.pic||'')+'|'+(q.seq||'')+'|'+(q.board?q.board.map(function(c){return c.h}).join(''):'')}
+  for(var k=0;k<5;k++){var q,tries=0;do{q=L.make();tries++}while(tries<40&&keys.indexOf(qkey(q))>=0);
+    if(keys.indexOf(qkey(q))>=0){tries=0;do{q=L.make();tries++}while(tries<40&&qkey(q)===keys[keys.length-1])}
+    keys.push(qkey(q));qs.push(q)}
+  run={i:i,qs:qs,q:0,earned:0,first:true,marks:[]};
+  question();
+}
+
+function question(){
+  var K=KIDS[cur],q=run.qs[run.q];run.first=true;
+  var dots='';for(var d=0;d<5;d++){dots+='<i class="'+(d<run.marks.length?(run.marks[d]?'ok':'on'):(d===run.q?'on':''))+'"></i>'}
+  app.innerHTML='<div class="top"><button class="btn ghost" id="quit" style="min-height:44px;padding:8px 18px;font-size:1rem">✕ Domov</button>'+starsPill()+'</div>'+
+   '<div class="dots" aria-label="Otázka '+(run.q+1)+' z 5">'+dots+'</div>'+
+   '<section class="q"><p class="say">'+q.text+'</p><button class="speak" id="spk" aria-label="Prečítať nahlas">🔊</button>'+
+   (q.pic?'<div class="pic'+(q.big?' big':'')+'">'+q.pic+'</div>':'')+
+   (q.seq?'<div class="seq">'+q.seq+'</div>':'')+
+   (q.eq?'<div class="eq">'+q.eq+'</div>':'')+
+   (q.board?'<div class="board" style="grid-template-columns:repeat('+q.cols+',1fr)">'+q.board.map(function(c,i){return '<button class="cell" data-i="'+i+'">'+c.h+'</button>'}).join('')+'</div><p class="muted" id="cnt"></p>'
+    :'<div class="opts">'+q.opts.map(function(o,i){return '<button class="opt" data-i="'+i+'">'+o.h+'</button>'}).join('')+'</div>')+'</section>';
+  document.getElementById('quit').onclick=home;
+  document.getElementById('spk').onclick=function(){say(q.text)};
+  if(L.speak)say(q.text);
+  app.querySelectorAll('.opt').forEach(function(b){b.onclick=function(){answer(b,q.opts[+b.dataset.i],q)}});
+  if(q.board){var found=0,cnt=document.getElementById('cnt');var upd=function(){cnt.textContent='Označené: '+found+' z '+q.need};upd();
+    app.querySelectorAll('.cell').forEach(function(b){b.onclick=function(){var c=q.board[+b.dataset.i];
+      if(c.t){ding(true);b.classList.add('ok');b.disabled=true;found++;upd();if(found===q.need){app.querySelectorAll('.cell').forEach(function(x){x.disabled=true});settle()}}
+      else{ding(false);run.first=false;b.classList.add('no');setTimeout(function(){b.classList.remove('no')},400)}}})}
+}
+
+function settle(){
+  if(run.first){run.earned++;state[cur].stars++;save()}
+  run.marks.push(run.first);
+  setTimeout(function(){run.q++;if(run.q<5)question();else finish()},900);
+}
+function answer(btn,o,q){
+  if(o.v===q.ans){
+    ding(true);btn.classList.add('ok');
+    app.querySelectorAll('.opt').forEach(function(x){x.disabled=true});
+    settle();
+  }else{
+    ding(false);run.first=false;btn.classList.add('no');btn.disabled=true;
+  }
+}
+
+function finish(){
+  var K=KIDS[cur];state[cur].done[run.i]=true;save();
+  var st='';for(var i=0;i<5;i++)st+='<span class="'+(i<run.earned?'':'off')+'">★</span>';
+  var hasNext=run.i<K.levels.length-1;
+  app.innerHTML='<div class="done"><h1>Výborne, '+K.name+'!</h1><div class="stars" aria-label="'+run.earned+' z 5 hviezdičiek">'+st+'</div>'+
+   '<div class="sticker">'+K.stickers[run.i]+'</div><p class="muted">Získal si novú nálepku. Spolu máš ★ '+state[cur].stars+'.</p>'+
+   '<div class="actions">'+(hasNext?'<button class="btn" id="nx">Ďalší level</button>':'')+'<button class="btn ghost" id="again">Ešte raz</button><button class="btn ghost" id="hm">Domov</button></div></div>';
+  say('Výborne '+(cur==='oliver'?'Oli':K.name));
+  if(hasNext)document.getElementById('nx').onclick=function(){start(run.i+1)};
+  document.getElementById('again').onclick=function(){start(run.i)};
+  document.getElementById('hm').onclick=home;
+}
+
+profiles();
+})();
+</script>
+</body>
+</html>
