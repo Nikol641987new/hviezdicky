@@ -167,6 +167,8 @@ function tapnQ(maxN){var n=rnd(2,maxN),e=pick(['🍎','⭐','🐟','🎈','🍪'
 var COLOR_DOTS=['🔴','🔵','🟡','🟢'];
 function groupOpt(n,e,size){return '<span style="font-size:'+size+';line-height:1.15;display:block;max-width:100%">'+rep(e,n)+'</span>'}
 function countQ(min,max){var n=rnd(min,max),o=pick(COUNTABLE);return{text:'Koľko je tu '+o[1]+'?',pic:rep(o[0],n),big:max<=5,opts:numOpts(n,1,Math.max(max,3)),ans:n}}
+function letterQ(letters){var c=pick(letters),o=shuffle(letters.filter(function(x){return x!==c})).slice(0,3).concat([c]);
+  return{text:'Ťukni na písmeno '+c+'.',opts:shuffle(o).map(function(x){return{h:'<span class="let">'+x+'</span>',v:x}}),ans:c}}
 function compareQ(max,size){var a=rnd(1,max),b=rnd(1,max);while(b===a)b=rnd(1,max);var e=pick(['🍎','⭐','🐟','🎈','🍪','🦋']),more=Math.random()<.7;
   return{text:more?'Ťukni na obrázok, kde je viac.':'Ťukni na obrázok, kde je menej.',opts:shuffle([{h:groupOpt(a,e,size),v:'a'},{h:groupOpt(b,e,size),v:'b'}]),ans:more?(a>b?'a':'b'):(a<b?'a':'b')}}
 function sumQ(maxSum){var a=rnd(1,maxSum-1),b=rnd(1,maxSum-a),o=pick(['🍎','⭐','🐟','🎈','🍪']);
@@ -198,7 +200,7 @@ var KIDS={
     return{text:'Vyber farbu, ktorá nasleduje.',pic:a+b+a+b+a+' <span class="eq">?</span>',big:true,opts:shuffle([a,b,c]).map(function(x){return{h:x,v:x}}),ans:b}}},
   {t:'Nájdi a označ',h:'Ťukni na všetky rovnaké',icon:'👆',speak:true,make:function(){return findQ(9,3,2,3)}}
  ]},
- oliver:{name:'Oliverko',ageText:'6 rokov',face:'🚀',stickers:['🚀','🪐','🤖','🏆','👑','🛸','🦖','🌈','🚒','🏅','🌟','🧩','🎁'],levels:[
+ oliver:{name:'Oliverko',ageText:'6 rokov',face:'🚀',stickers:['🚀','🪐','🤖','🏆','👑','🛸','🦖','🌈','🚒','🏅','🌟','🧩','🎁','🐬','🦉','🐳','🐞'],levels:[
   {t:'Počítame do 5',h:'Koľko vidíš?',icon:'🖐️',speak:true,make:function(){return countQ(1,5)}},
   {t:'Ktoré číslo nasleduje',h:'Čo príde po čísle',icon:'➡️',speak:true,make:function(){var n=rnd(1,9);return{text:'Vyber číslo, ktoré nasleduje po '+n+'.',eq:n+' → ?',opts:numOpts(n+1,1,10),ans:n+1}}},
   {t:'Viac alebo menej',h:'Ktorá skupina je väčšia?',icon:'⚖️',speak:true,make:function(){return compareQ(10,'1.5rem')}},
@@ -215,7 +217,11 @@ var KIDS={
   {t:'Označ toľko',h:'Ťukni presne toľkokrát',icon:'☝️',speak:true,make:function(){return tapnQ(10)}},
   {t:'Počítame do 10',h:'Koľko vidíš, 1 až 10?',icon:'🔟',speak:true,make:function(){return countQ(4,10)}},
   {t:'Sčítame do 10',h:'Koľko je to spolu?',icon:'➕',speak:true,make:function(){return sumQ(10)}},
-  {t:'Odčítame do 10',h:'Koľko ostalo?',icon:'➖',speak:true,make:function(){return subQ(10)}}
+  {t:'Odčítame do 10',h:'Koľko ostalo?',icon:'➖',speak:true,make:function(){return subQ(10)}},
+  {t:'Samohlásky',h:'A, E, I, O, U',icon:'🔤',speak:true,make:function(){return letterQ(['A','E','I','O','U'])}},
+  {t:'Písmenká M, L, S, P, T',h:'Nájdi písmenko, ktoré počuješ',icon:'🔤',speak:true,make:function(){return letterQ(['M','L','S','P','T'])}},
+  {t:'Písmenká R, K, N, V, D',h:'Nájdi písmenko, ktoré počuješ',icon:'🔤',speak:true,make:function(){return letterQ(['R','K','N','V','D'])}},
+  {t:'Písmenká B, C, F, H, J',h:'Nájdi písmenko, ktoré počuješ',icon:'🔤',speak:true,make:function(){return letterQ(['B','C','F','H','J'])}}
  ]}
 };
 
